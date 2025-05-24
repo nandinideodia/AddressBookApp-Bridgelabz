@@ -20,6 +20,7 @@ public class ContactService {
             contactDto.getPhone(),
             contactDto.getEmail()
         );
+        contact.setId(idCounter.getAndIncrement());
         contacts.add(contact);
         return contact;
     }
