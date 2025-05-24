@@ -38,33 +38,22 @@ public class ContactController {
     @GetMapping("/{id}")
     public ResponseEntity<ResponseDto> getContactById(@PathVariable Long id) {
         Contact contact = contactService.getContactById(id);
-        if (contact != null) {
-            return ResponseEntity.ok()
-                    .body(new ResponseDto("success", "Contact retrieved successfully", contact));
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ResponseDto("error", "Contact not found", null));
+        return ResponseEntity.ok()
+                .body(new ResponseDto("success", "Contact retrieved successfully", contact));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ResponseDto> updateContact(
             @PathVariable Long id, @Valid @RequestBody ContactDto contactDto) {
         Contact updatedContact = contactService.updateContact(id, contactDto);
-        if (updatedContact != null) {
-            return ResponseEntity.ok()
-                    .body(new ResponseDto("success", "Contact updated successfully", updatedContact));
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ResponseDto("error", "Contact not found", null));
+        return ResponseEntity.ok()
+                .body(new ResponseDto("success", "Contact updated successfully", updatedContact));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ResponseDto> deleteContact(@PathVariable Long id) {
-        if (contactService.deleteContact(id)) {
-            return ResponseEntity.ok()
-                    .body(new ResponseDto("success", "Contact deleted successfully", null));
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ResponseDto("error", "Contact not found", null));
+        contactService.deleteContact(id);
+        return ResponseEntity.ok()
+                .body(new ResponseDto("success", "Contact deleted successfully", null));
     }
 }

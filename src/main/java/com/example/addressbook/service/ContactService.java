@@ -1,6 +1,7 @@
 package com.example.addressbook.service;
 
 import com.example.addressbook.dto.ContactDto;
+import com.example.addressbook.exception.AddressBookNotFoundException;
 import com.example.addressbook.model.Contact;
 import org.springframework.stereotype.Service;
 
@@ -33,21 +34,19 @@ public class ContactService {
         return contacts.stream()
                 .filter(c -> c.getId().equals(id))
                 .findFirst()
-                .orElse(null);
+                .orElseThrow(() -> new AddressBookNotFoundException(id));
     }
 
     public Contact updateContact(Long id, ContactDto contactDto) {
         Contact existingContact = getContactById(id);
-        if (existingContact != null) {
-            existingContact.setName(contactDto.getName());
-            existingContact.setPhone(contactDto.getPhone());
-            existingContact.setEmail(contactDto.getEmail());
-            return existingContact;
-        }
-        return null;
+        existingContact.setName(contactDto.getName());
+        existingContact.setPhone(contactDto.getPhone());
+        existingContact.setEmail(contactDto.getEmail());
+        return existingContact;
     }
 
-    public boolean deleteContact(Long id) {
-        return contacts.removeIf(c -> c.getId().equals(id));
+    public void deleteContact(Long id) {
+        Contact contact = getContactById(id);
+        contacts.remove(contact);
     }
 }

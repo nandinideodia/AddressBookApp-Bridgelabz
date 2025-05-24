@@ -69,4 +69,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, response, new HttpHeaders(),
                HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
+    
+    @ExceptionHandler(AddressBookNotFoundException.class)
+    public final ResponseEntity<ErrorResponseDto> handleAddressBookNotFound(
+            AddressBookNotFoundException ex, WebRequest request) {
+        ErrorResponseDto response = new ErrorResponseDto(
+            "NOT_FOUND",
+            ex.getMessage(),
+            null
+        );
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
 }
