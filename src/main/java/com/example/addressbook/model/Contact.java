@@ -15,7 +15,8 @@ public class Contact {
     // Constructors
     public Contact() {}
     
-    public Contact(String name, String phone, String email) {
+    public Contact(Long id, String name, String phone, String email) {
+        this.id = id;
         this.name = name;
         this.phone = phone;
         this.email = email;

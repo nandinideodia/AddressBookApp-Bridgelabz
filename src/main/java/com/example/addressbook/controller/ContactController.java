@@ -3,43 +3,36 @@ package com.example.addressbook.controller;
 import com.example.addressbook.dto.ContactDto;
 import com.example.addressbook.dto.ResponseDto;
 import com.example.addressbook.model.Contact;
-import com.example.addressbook.repository.ContactRepository;
+import com.example.addressbook.service.ContactService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/contacts")
 public class ContactController {
 
     @Autowired
-    private ContactRepository contactRepository;
+    private ContactService contactService;
 
     @PostMapping
     public ResponseEntity<ResponseDto> createContact(@RequestBody ContactDto contactDto) {
-        Contact contact = new Contact();
-        contact.setName(contactDto.getName());
-        contact.setPhone(contactDto.getPhone());
-        contact.setEmail(contactDto.getEmail());
-        
-        Contact savedContact = contactRepository.save(contact);
+        Contact contact = contactService.createContact(contactDto);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ResponseDto("success", "Contact created successfully", savedContact));
+                .body(new ResponseDto("success", "Contact created successfully", contact));
     }
 
     @GetMapping
     public ResponseEntity<ResponseDto> getAllContacts() {
-        List<Contact> contacts = contactRepository.findAll();
         return ResponseEntity.ok()
-                .body(new ResponseDto("success", "Contacts retrieved successfully", contacts));
+                .body(new ResponseDto("success", "Contacts retrieved successfully", 
+                    contactService.getAllContacts()));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ResponseDto> getContactById(@PathVariable Long id) {
-        Contact contact = contactRepository.findById(id).orElse(null);
+        Contact contact = contactService.getContactById(id);
         if (contact != null) {
             return ResponseEntity.ok()
                     .body(new ResponseDto("success", "Contact retrieved successfully", contact));
@@ -51,12 +44,8 @@ public class ContactController {
     @PutMapping("/{id}")
     public ResponseEntity<ResponseDto> updateContact(
             @PathVariable Long id, @RequestBody ContactDto contactDto) {
-        Contact existingContact = contactRepository.findById(id).orElse(null);
-        if (existingContact != null) {
-            existingContact.setName(contactDto.getName());
-            existingContact.setPhone(contactDto.getPhone());
-            existingContact.setEmail(contactDto.getEmail());
-            Contact updatedContact = contactRepository.save(existingContact);
+        Contact updatedContact = contactService.updateContact(id, contactDto);
+        if (updatedContact != null) {
             return ResponseEntity.ok()
                     .body(new ResponseDto("success", "Contact updated successfully", updatedContact));
         }
@@ -66,8 +55,7 @@ public class ContactController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ResponseDto> deleteContact(@PathVariable Long id) {
-        if (contactRepository.existsById(id)) {
-            contactRepository.deleteById(id);
+        if (contactService.deleteContact(id)) {
             return ResponseEntity.ok()
                     .body(new ResponseDto("success", "Contact deleted successfully", null));
         }
