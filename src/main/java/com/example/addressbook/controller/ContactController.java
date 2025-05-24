@@ -4,10 +4,16 @@ import com.example.addressbook.dto.ContactDto;
 import com.example.addressbook.dto.ResponseDto;
 import com.example.addressbook.model.Contact;
 import com.example.addressbook.service.ContactService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/contacts")
@@ -17,7 +23,7 @@ public class ContactController {
     private ContactService contactService;
 
     @PostMapping
-    public ResponseEntity<ResponseDto> createContact(@RequestBody ContactDto contactDto) {
+    public ResponseEntity<ResponseDto> createContact(@Valid @RequestBody ContactDto contactDto) {
         Contact contact = contactService.createContact(contactDto);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new ResponseDto("success", "Contact created successfully", contact));
@@ -43,7 +49,7 @@ public class ContactController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ResponseDto> updateContact(
-            @PathVariable Long id, @RequestBody ContactDto contactDto) {
+            @PathVariable Long id, @Valid @RequestBody ContactDto contactDto) {
         Contact updatedContact = contactService.updateContact(id, contactDto);
         if (updatedContact != null) {
             return ResponseEntity.ok()
@@ -61,5 +67,18 @@ public class ContactController {
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ResponseDto("error", "Contact not found", null));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ResponseDto> handleValidationExceptions(
+            MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ResponseDto("error", "Validation failed", errors));
     }
 }
